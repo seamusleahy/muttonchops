@@ -25,7 +25,7 @@
     muttonchops.registerFilter(name, function(v) {
       return String.prototype[fn].apply(v, Array.prototype.slice.call(arguments, 1));
     });
-  };
+  });
 
     
   /**

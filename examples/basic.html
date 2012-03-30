@@ -2,9 +2,233 @@
 <html>
 <head>
 	<title>Muttonchops Test</title>
+	
+	<script src="../lib/underscore.js"></script>
+  <script src="../lib/underscore.string.js"></script>
+  <script src="../src/core/muttonchops.core.js"></script>
+  <script src="../src/standard/muttonchops.standard.tags.js"></script>
+  <script src="../src/standard/muttonchops.standard.filters.js"></script>
 </head>
 <body>
+<h1>Output 1</h1>
+<pre id="output">
+</pre>
 
+<h1>Output after serialization and unserialization</h1>
+<pre id="output2">
+</pre>
+
+<script type="muttonchops" id="template">
+{{ class_name|lower|repeat:4,"/" }} extends {{ base_class_name }} { 
+  {% if class_name %} 
+    if-string
+  {% elseif class_name %}
+    else-if string
+  {% else %} 
+    elsestring 
+  {% endif %} 
+  
+  function 
+  
+  {% for firstname, lastname in names %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{ lastname }}, {{ firstname }}
+    ----
+  {% endfor %}
+  
+  
+  {% for abbr, state in states %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{abbr}} = {{ state }}
+    ----
+  {% endfor %}
+  
+  
+  {% for type, a, b, c, d in numbers %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{type}} = {{a}}, {{b}}, {{c}}, {{d}}
+    ----
+  {% endfor %}
+  
+  Math filters
+  Mean: {{ ages|mean }}
+  Median: {{ ages|median }}
+  Standard Deviation {{ ages|stdDeviation }}
+  
+  {% if class_name %} 
+    if-string
+  {% elseif class_name %}
+    else-if string
+  {% else %} 
+    elsestring 
+  {% endif %} 
+  
+  function 
+  
+  {% for firstname, lastname in names %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{ lastname }}, {{ firstname }}
+    ----
+  {% endfor %}
+  
+  
+  {% for abbr, state in states %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{abbr}} = {{ state }}
+    ----
+  {% endfor %}
+  
+  
+  {% for type, a, b, c, d in numbers %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{type}} = {{a}}, {{b}}, {{c}}, {{d}}
+    ----
+  {% endfor %}
+  
+  Math filters
+  Mean: {{ ages|mean }}
+  Median: {{ ages|median }}
+  Standard Deviation {{ ages|stdDeviation }}
+  
+  {% if class_name %} 
+    if-string
+  {% elseif class_name %}
+    else-if string
+  {% else %} 
+    elsestring 
+  {% endif %} 
+  
+  function 
+  
+  {% for firstname, lastname in names %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{ lastname }}, {{ firstname }}
+    ----
+  {% endfor %}
+  
+  
+  {% for abbr, state in states %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{abbr}} = {{ state }}
+    ----
+  {% endfor %}
+  
+  
+  {% for type, a, b, c, d in numbers %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{type}} = {{a}}, {{b}}, {{c}}, {{d}}
+    ----
+  {% endfor %}
+  
+  Math filters
+  Mean: {{ ages|mean }}
+  Median: {{ ages|median }}
+  Standard Deviation {{ ages|stdDeviation }}
+  
+  {% if class_name %} 
+    if-string
+  {% elseif class_name %}
+    else-if string
+  {% else %} 
+    elsestring 
+  {% endif %} 
+  
+  function 
+  
+  {% for firstname, lastname in names %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{ lastname }}, {{ firstname }}
+    ----
+  {% endfor %}
+  
+  
+  {% for abbr, state in states %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{abbr}} = {{ state }}
+    ----
+  {% endfor %}
+  
+  
+  {% for type, a, b, c, d in numbers %}
+    {{ forloop.counter}} {{ forloop.counter0}} {{forloop.revcounter}} {{forloop.revcounter0}}
+    {% if forloop.first %} FIRST {% endif %} {% if forloop.last %} LAST {%endif%}
+    {{type}} = {{a}}, {{b}}, {{c}}, {{d}}
+    ----
+  {% endfor %}
+  
+  Math filters
+  Mean: {{ ages|mean }}
+  Median: {{ ages|median }}
+  Standard Deviation {{ ages|stdDeviation }}
+  
+}
+</script>
+
+<script>
+  template = muttonchops.make(document.getElementById('template').innerHTML);
+  
+  
+  
+  var serializedTree = template.template.serialize();
+  console.log( 'Serialized template', serializedTree );
+  
+  var start = (new Date()).getTime();
+  var duplicatedTemplate = muttonchops.ParseList._unserialize(serializedTree);
+  console.log( 'Unserialized template', duplicatedTemplate );
+  document.getElementById('output2').innerHTML =  duplicatedTemplate.execute({
+    class_name: 'WP_Super_Custom_Widget', 
+    base_class_name: 'WP_Widget', 
+    names: [['Ben', 'Byrne'], ['Bryan', 'Hackett'], ['Craig', 'Zingerline']],
+    states: {
+      'DE': 'Delaware',
+      'HI': 'Hawaii',
+      'IL': 'Illinois'
+    },
+    numbers: {
+      'odd': [1,3,5,7],
+      'even': [2,4,6,8],
+      'prime': [2,3,5,7],
+      'fib': [1,1,2,3]
+    },
+    
+    ages: [22, 22, 40, 41, 41]
+  });
+  console.log('Unserialize and exec: ', (new Date()).getTime() - start);
+  
+  
+  var start = (new Date()).getTime();
+  document.getElementById('output').innerHTML = template({
+    class_name: 'WP_Custom_Widget', 
+    base_class_name: 'WP_Widget', 
+    names: [['Seamus', 'Leahy'], ['Ryan', 'Naughton'], ['Andrew', 'Marcus']],
+    states: {
+      'MD': 'Maryland',
+      'NY': 'New York',
+      'VA': 'Virginia',
+      'NJ': 'New Jersey'
+    },
+    numbers: {
+      'odd': [1,3,5,7],
+      'even': [2,4,6,8],
+      'prime': [2,3,5,7],
+      'fib': [1,1,2,3]
+    },
+    
+    ages: [22, 22, 40, 41, 41]
+  });
+  console.log('Compile and exec: ', (new Date()).getTime() - start);
+</script>
 
 
 </body>
