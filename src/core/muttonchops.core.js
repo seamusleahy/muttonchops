@@ -29,25 +29,29 @@
   
   
   /**
-   * Make a template function
+   * Make a template function from raw input string or serialized template
    *
    * @param templateString string - the templateString
    *
    * @return function - the function to execute to run the template
    */
-  root.muttonchops.make = function(templateString) {
-    var template = new Template(templateString);
+  root.muttonchops.make = function(templateInput, options) {
+    if(_.isObject(templateInput)) {
+      var template = Template.unserialize(templateInput, options);
+    } else {
+      var template = new Template(templateInput, options);
+    }
     
     var ret = function(data) {
       return template.execute(data);
     };
     
-    ret.templateString = templateString;
+    //ret.templateString = templateString;
     ret.template = template;
     
     return ret;
   };
-  
+
   
   /**
    * Register a filter
@@ -73,10 +77,9 @@
     } else if (_.isObject(handler) && handler.execute && _.isFunction(handler.execute)) {
       allTags[name] = handler;
     }
-    
   };
   
-  
+
   
   
   // Core class object based on John Resig's code
@@ -85,121 +88,8 @@
     // The base Class implementation (does nothing)
     var Class = root.muttonchops.Class = function(){};
     
-    var registeredClasses = {};
-    
-    // Serialize function
-    var serialize = function(obj) {
-      if(_.isArray(obj)) {
-        var serialized = [];
-        
-        for(var i=0; i<obj.length; ++i) {
-          if(_.isFunction(obj[i])) {
-            // do nothing for functions
-          
-          } else if(_.isArray(obj[i])) {
-            serialized.push( serialize(obj[i]) );
-            
-          } else if(_.isObject(obj[i]) && obj[i].serialize) {
-            serialized.push( obj[i].serialize() );
-            
-          } else if(_.isObject(obj[name])) {
-            serialized.push( serialize(obj[i]) );
-            
-          } else {
-            serialized.push( obj[i] );
-          }
-        }
-        
-        return serialized;
-        
-      } else if(_.isObject(obj)) {
-        var serialized = {};
-        for(var name in obj) {
-          if(obj._meta && obj._meta.ignoreProps && obj._meta.ignoreProps.indexOf(name) != -1) {
-            // do nothing
-            
-          } else if(name == 'Class') {
-            // do nothing for the base class
-            
-          } else if(_.isFunction(obj[name])) {
-            // do nothing for functions
-          
-          } else if(_.isArray(obj[name])) {
-            serialized[name] = serialize(obj[name]);
-            
-          } else if(_.isObject(obj[name]) && obj[name].serialize) {
-            serialized[name] = obj[name].serialize();
-            
-          } else if(_.isObject(obj[name])) {
-            serialized[name] = serialize(obj[name]);
-            
-          } else {
-            serialized[name] = obj[name];
-          }
-        }
-        
-        return serialized;
-      }
-      
-      return null;
-    }
-    
-    
-    
-    /**
-     * Pass a JSON object (that has already been parsed if it is a string)
-     * to unserialize into a class
-     */
-    var unserialize = function(obj, refs) {
-      refs = _.clone( refs || {} );
-      
-      if(_.isArray(obj)) {
-        var a = [];
-        
-        _.each(obj, function(elem) {
-          a.push( unserialize(elem, refs) );
-        });
-        
-        return a;
-      } else if(_.isObject(obj) && obj._meta && obj._meta.className && registeredClasses[obj._meta.className]) {
-        initializing = true;
-        var c = new registeredClasses[obj._meta.className]();
-        initializing = false;
-        c._meta = obj._meta;
-        
-        if(c._unserializePreInit) {
-          c._unserializePreInit(refs);
-        }
-        
-        _.each(obj, function(val, key) {
-          if(!c[key]) {
-            c[key] = unserialize(val, refs);
-          }
-        });
-        
-        if(c._unserializeInit) {
-          c._unserializeInit();
-        }
-        
-        return c;
-        
-      } else if(_.isObject(obj)) {
-        var o = {};
-        
-        _.each(obj, function(val, key) {
-          o[key] = unserialize(val, refs);
-        });
-        
-        return o;
-      } else {
-        return obj;
-      }
-    };
-    
-    
-    
     // Create a new Class that inherits from this class
-    Class.extend = function(klassName, prop, classProps, ignoreProps) {
+    Class.extend = function(prop, classProps) {
       var _super = this.prototype;
       
       // Instantiate a base class (but only create the instance,
@@ -207,13 +97,6 @@
       initializing = true;
       var prototype = new this();
       initializing = false;
-      
-      
-      // Serialization and unserialization      
-      prototype.serialize = function() {
-        return serialize(this);
-      };
-      
       
       // Copy the properties over onto the new prototype
       for (var name in prop) {
@@ -254,19 +137,8 @@
         }
       }
       
-      Class._unserialize = unserialize;
-      registeredClasses[klassName] = Class;
-      
       // Populate our constructed prototype object
       Class.prototype = prototype;
-      
-      // Store the class name
-      var meta = {'className': klassName};
-      
-      meta.ignoreProps = _.union( (prototype._meta && prototype._meta.ignoreProps ? prototype._meta.ignoreProps : []),  (ignoreProps || []) );
-      
-      Class.prototype._meta = meta;
-      
       
       // Enforce the constructor to be what we expect
       Class.prototype.constructor = Class;
@@ -281,34 +153,39 @@
   
   var Class = root.muttonchops.Class;
   
-  
-  
-  
   // Internal variables
   var allFilters = {};
   var allTags = {};
   
-  
+
   
   /**
    * Template Class
    *
    * Takes a string to render into a template and then process.
    */
-  var Template = Class.extend('Template', {
+  var Template = Class.extend({
     /**
      * constructor
      *
      * @param templateString string - the template to processes
      */
-    init: function(templateString) {
-      this.env = new Environment();
-      this.parseList = new ParseList();
-      this.parseList.parse(templateString, this.env);
+    init: function(templateString, options, serializing) {
+      this.options = _.extend({}, {
+        templateLoader: root.muttonchops.defaultTemplateLoader
+      }, options || {});
+      
+      if(!serializing && !_.isArray(templateString)) {
+        this.parseList = new ParseList();
+        this.parseList.parse(templateString);
+      } else {
+        this.parseList = ParseList.unserialize(templateString);
+      }
+      
     },
     
-    _unserializePreInit: function(refs) {
-      refs.env = this.env = new Environment();
+    serialize: function() {
+      return this.parseList.serialize(this.options);
     },
     
     
@@ -320,11 +197,17 @@
      * @return string - the rendered output
      */
     execute: function(data) {
-      this.env.reset(data);
-      this.parseList.run();
-      return this.env.output;
+      var env = new Environment();
+      env.reset(data);
+      this.parseList.run(env, this.options);
+      return env.output;
     }
-  }, {}, ['env']);
+  }, {
+    
+    unserialize: function(src, options) {
+      return new Template(src, options, false);
+    }
+  });
   
   
   
@@ -332,7 +215,7 @@
    * The environment during the rendering
    *
    */
-  var Environment = Class.extend('Environment', {
+  var Environment = Class.extend({
     init: function() {
       this.data = {};
       this.output = '';
@@ -372,35 +255,52 @@
       var parts = variable.split('.');
       var p = this.data;
       
-      for(var i=0; i<parts.length; ++i) {
-        if(p[parts[i]] != null) {
-          if(_.isFunction(p[parts[i]])) {
-            p = p[parts[i]].call(p);
+      var l = parts.length;
+      var i = l;
+      var j;
+      while(i) {
+        j = l - i;
+        if(p[parts[j]] != null) {
+          if(_.isFunction(p[parts[j]])) {
+            p = p[parts[j]].call(p);
           } else {
-            p = p[parts[i]];
+            p = p[parts[j]];
           }
         } else {
           return null;
         }
+        
+        --i;
       }
-      
+
       return p;
     }
-  }, {}, ['data', 'output']);
+  });
   
   
   /**
    * ParseList
    */
-  var ParseList = root.muttonchops.ParseList = Class.extend('ParseList', {
+  var ParseList = root.muttonchops.ParseList = Class.extend({
     init: function() {
       this.list = [];
       this.position = 0;
     },
     
-    _unserializePreInit: function(refs) {
-      refs.parseList = this;
-      this.position = 0;
+    serialize: function(options) {
+      var list = [];
+      
+      var p = this.position;
+      var l = this.list.length;
+      for(var i=0; i<l; ++i) {
+        this.position = i;
+        this.preprocessToken(this.list[i]);
+        list.push(this.list[i]);
+      }
+      
+      this.position = p;
+      
+      return list;
     },
     
     /**
@@ -456,27 +356,43 @@
      *
      * @param token Token - the token to rewind the list to
      */
-    rewindTo: function(token) {
-      while(this.position >= 0 && this.list[this.position] != token) { 
-        this.position--;
+    rewindTo: function(to) {
+      if(_.isNumber(to)) {
+        this.position = to;
+      } else {
+        while(this.position >= 0 && this.list[this.position] != to) { 
+          --this.position;
+        }
       }
       
-      if(this.position < 0) {
-        this.position = 0;
-      }
+      this.position = Math.min( Math.max( this.position, 0 ), this.list.length-1 );
       
-      return this.list[this.position]
+      return this.list[this.position];
+    },
+    
+    /**
+     *
+     */
+    forwardTo: function(to) {
+      if(_.isNumber(to)) {
+        this.position = to;
+      } else {
+        while(this.position < this.list.length && this.list[this.position] != to) { 
+          ++this.position;
+        }  
+      }      
+      return this.list[this.position];
     },
     
     /**
      * Start running through the list of tokens
      */
-    run: function() {
+    run: function(env, options) {
+      this.env = env;
+      this.options = options;
       var t = this.list[this.position];
-      while(!this.end()) {
-        if(t.exec) {
-          t.exec();
-        }
+      while(!this.end() && t) {
+        this.execToken(t);
         t = this.next();
       }
     },
@@ -485,9 +401,8 @@
      * Parse a template string
      *
      * @param templateString string - the template
-     * @param env Environment - the environment object to use
      */
-    parse: function(templateString, env) {
+    parse: function(templateString) {
       var matches = templateString.match(/{{([^}]|}[^}])*}}|{%([^%]|%[^}])*%}|([^{]|{[^{%])+/g);
       
       var printRe = /^{{\s*(.*?)\s*}}$/;
@@ -497,67 +412,55 @@
       var m;
       
       for(var i=0; i<matches.length; ++i) {
+        var tok = {};
         if((m=matches[i].match(printRe))) {
-          tokens.push(new PrintToken(m[1], env, this));
+          tok.type = 'print';
         } else if((m=matches[i].match(tagRe))) {
-          tokens.push(new TagToken(m[1], env, this));
+          tok.type = 'tag';
         } else {
-          tokens.push(new TextToken(matches[i], env, this));
+          tok.type = 'text';
         }
+        TokenTypes[tok.type].init(tok, (m? m[1] : matches[i]));
+        tokens.push(tok);
       }
       
       this.setList(tokens);
+    },
+    
+    execToken: function(tok) {
+      TokenTypes[tok.type].preprocess(tok, this);
+      TokenTypes[tok.type].exec(tok, this);
+    },
+    
+    preprocessToken: function(tok) {
+      TokenTypes[tok.type].preprocess(tok, this);
     }
-  }, {}, ['position']);
+  }, {
+  
+    unserialize: function(tokens) {
+      var parseList = new ParseList();
+      parseList.setList(tokens);
+      return parseList;
+    }
+  });
   
 
-   
-   
-  
-  /**
-   * Base Token class
-   */
-  var Token = Class.extend('Token', {
-    init: function(value, env, parseList) {
-      this.value = value;
-      this.env = env;
-      this.parseList = parseList;
-      this.isPreprocessed = false;
-      
-      if(this.setup) {
-        this.setup();
-      }
-    },
-    
-    _unserializePreInit: function(refs) {
-      this.env = refs.env;
-      this.parseList = refs.parseList;
-    },
-    
-    type: 'token',
-    
-    preprocess: function() {
-      if(!this.isPreprocessed) {
-        this.isPreprocessed = true;
-      }
-    },
-    
-    exec: function() {
-      this.preprocess();
-      if(this.value != null) {
-        this.env.print(this.value);
-      }
-    }
-  }, {}, ['env', 'parseList']);
-  
+  var TokenTypes = {};
   
   /**
    * Text token
-   */
-  var TextToken = Token.extend('TextToken', {
-    type: 'text',
-  });
-  
+   */  
+  TokenTypes.text = {
+    init: function(tok, value) {
+      tok.value = value;
+    },
+    
+    preprocess: function(tok, parseList) {},
+    
+    exec: function(tok, parseList) {
+      parseList.env.print(tok.value);
+    }
+  };
   
   
   /**
@@ -565,22 +468,23 @@
    *
    * {{ }}
    */
-  var PrintToken = Token.extend('PrintToken', {
-    type: 'print',
-    
-    setup: function() {
-      this.valueEval = new ValueWithFilters(this.value);
+
+  TokenTypes.print = {
+    init: function(tok, value) {
+      if(!tok.valueEval) {
+        tok.valueEval = valueWithFilters.parse(value);
+      }
     },
     
-    exec: function() {
-      this.preprocess();
-      var v = this.valueEval.evaluate(this.env);
+    preprocess: function(tok, parseList) {},
+    
+    exec: function(tok, parseList) {
+      var v = valueWithFilters.evaluate(tok.valueEval, parseList.env);
       if(v != null) {
-        this.env.print(v);
+        parseList.env.print(v);
       }
     }
-  });
-  
+  };
   
   
   /**
@@ -588,46 +492,46 @@
    *
    * {% %}
    */
-  var TagToken = Token.extend('TagToken', {
-    type: 'tag',
-    
-    setup: function() {
-      var parts = this.value.match(/("[^"]*"|'[^']*'|\S+)+/g);
-      this.name = parts[0];
-      this.parts = parts.slice(1);
-    },
-    
-    exec: function() {
-      this.preprocess();
-      if(allTags[this.name]) {
-        allTags[this.name].execute.call(this);
+  
+  TokenTypes.tag = {
+    init: function(tok, value) {
+      if(!tok.name) {
+        var parts = value.match(/("[^"]*"|'[^']*'|\S+)+/g);
+        tok.name = parts[0];
+        tok.parts = parts.slice(1);
       }
     },
     
-    preprocess: function() {
-      if(!this.isPreprocessed) {
-        this.isPreprocessed = true;
-        
-        if(allTags[this.name].preprocess) {
-          allTags[this.name].preprocess.call(this);
+    preprocess: function(tok, parseList) {
+      if(!tok.isPreprocessed) {
+        tok.isPreprocessed = true;
+      
+        if(allTags[tok.name] && allTags[tok.name].preprocess) {
+          allTags[tok.name].preprocess.call(this, tok, parseList);
         }
       }
     },
-  });
-  
+    
+    exec: function(tok, parseList) {
+      if(allTags[tok.name]) {
+        allTags[tok.name].execute.call(this, tok, parseList);
+      }
+    }
+  };
   
   
   /**
    * Handle a value and any filters attached to it
    */
-  var ValueWithFilters = Class.extend('ValueWithFilters', {
-    init: function(value) {
+  var valueWithFilters = {
+    parse: function(value) {
+      var tree = {};
       var parts = value.split('|');
-      this.variable = parts[0];
+      tree.variable = parts[0];
       
       parts = parts.slice(1); // remove the variable from the filters
       
-      var filters = this.filters = [];
+      var filters = tree.filters = [];
       
       _.each(parts, function(v) {
         var r = {};
@@ -651,30 +555,59 @@
           });
         }
       });
+      
+      return tree;
     },
     
-    /**
-     * Get the evaluated value from the environment and applying any filters
-     *
-     * @param env Environment - the environment to pull the variable from
-     *
-     * @return value
-     */
-    evaluate: function(env) {
+    evaluate: function(tree, env) {
       // get the value
-      var v = env.getValue(this.variable);
+      var v = env.getValue(tree.variable);
       
       // apply the filters
-      for(var i=0; i<this.filters.length; ++i) {
-        var f = this.filters[i];
+      var l = tree.filters.length;
+      var filters = tree.filters;
+      var i = l;
+      while(i) {
+        var f = filters[l-i];
         if(allFilters[f.name]) {
           var args = [v].concat(f.args);
           v = allFilters[f.name].apply(root, args);
         }
+        --i;
       }
       
       return v;
     }
+  };
+
+
+  
+  
+  // Template loader
+  root.muttonchops.TemplateLoader = Class.extend({
+    fetch: function( lookup ) {
+      return null;
+    }
   });
+  
+  var RegisterTemplateLoader = root.muttonchops.TemplateLoader.extend({
+    init: function() {
+      this.templates = {};
+    },
+    
+    register: function(name, source) {
+      this.templates[name] = source;
+    },
+    
+    fetch: function( name ) {
+      return this.templates[name];
+    }
+  });
+  
+  /**
+   * The callback for loading external templates within a template
+   *
+   */
+  root.muttonchops.defaultTemplateLoader = new RegisterTemplateLoader();
 
 })();

@@ -3,26 +3,25 @@
   /**
    * Branching: if/unless/elseif/else
    */
-  var branching = function() {
-    if(!this.statementTest) {
-      this.statementTest = booleanStatementParser(this.parts[0]);
-    }
-    var test = this.statementTest(this.env);
+  var branching = function(tok, parseList) {
+    var statementTest = booleanStatementParser(tok.parts[0]);
+    
+    var test = statementTest(parseList.env);
     
     var doIt = test;
-    if(this.name == 'unless') {
+    if(tok.name == 'unless') {
       doIt = !doIt;
     }
     var executed = doIt;
     
-    var token = this.parseList.next();
+    var token = parseList.next();
     while(token && (token.type != 'tag' || token.name != 'endif')) {
       // Elseif - when previous block has not run
       if(token.type == 'tag' && token.name == 'elseif' && !executed) {
         if(!token.statementTest) {
           token.statementTest = booleanStatementParser(token.parts[0]);
         }
-        if(token.statementTest(this.env)) {
+        if(statementTest(parseList.env)) {
           executed = true;
           doIt = true;
         } else {
@@ -40,10 +39,10 @@
       
       // Any other token when we are in the active block
       } else if(doIt) {
-        token.exec();
+        parseList.execToken(token);
       }
       
-      token = this.parseList.next();
+      token = parseList.next();
     }
     
   };
@@ -89,7 +88,7 @@
    * 
    * Provides the iterator logic and template variables
    */
-  var ForLoop = muttonchops.Class.extend('ForLoop', {
+  var ForLoop = muttonchops.Class.extend({
     init: function(variable, args, env, parentloop) {
       this._collection = env.getValue(variable);
       this._type = _.isArray(this._collection) ? 'array' : _.isObject(this._collection) ? 'object' : 'other';
@@ -131,6 +130,10 @@
     
     // Internal usage
     next: function() {
+      if(this.type == 'other') {
+        return false;
+      }
+      
       this._cur = this._cur+1;
       if(this._cur >= this._length) {
         this._env.data.forloop = this.parentloop;
@@ -175,33 +178,80 @@
    * for tag
    */
   muttonchops.registerTag('for', {
-    preprocess: function() {
-      this.variable = _.last(this.parts);
-      this.args = this.parts.slice(0, this.parts.length-2).join('').split(',');
+    preprocess: function(tok, parseList) {
+      tok.variable = _.last(tok.parts);
+      tok.args = tok.parts.slice(0, tok.parts.length-2).join('').split(',');
+      
+      // Find the empty and endfor tags
+      tok.forPosition = parseList.position; // for rolling back
+      
+      var token = parseList.next();
+      while(token && (token.type != 'tag' || token.name != 'endfor' )) {
+        if(token.type == 'tag') {
+          // The empty tag was found, record its position
+          if(token.name == 'empty') {
+            tok.emptyPosition = parseList.position;
+          
+          // A nest for loop was found, run its preprocess as not to misidentify this loops tags
+          } else if(token.name == 'for') {
+            parseList.preprocessToken(token);
+            parseList.forwardTo(token.endforPosition);
+          }
+        }
+        
+        token = parseList.next();
+      }
+      tok.endforPosition = parseList.position;
+      parseList.rewindTo(tok.forPosition); // revert position
     },
     
-    execute: function() {
-      this.variable = _.last(this.parts);
-      this.args = this.parts.slice(0, this.parts.length-2).join('').split(',');
+    execute: function(tok, parseList) {
+      //this.variable = _.last(this.parts);
+      //this.args = this.parts.slice(0, this.parts.length-2).join('').split(',');
       
-      var forloop = new ForLoop(this.variable, this.args, this.env, this.env.getValue('forloop'));
+      var forloop = new ForLoop(tok.variable, tok.args, parseList.env, parseList.env.getValue('forloop'));
       
+      
+      var stopTags = {'endfor':1, 'empty':1};
       while(forloop.next()) {
-        this.parseList.rewindTo(this);
-        var token = this.parseList.next();
+        parseList.rewindTo(tok.forPosition);
+        var token = parseList.next();
         
-        while(token && (token.type != 'tag' || token.name != 'endfor')) {
-          token.exec();
-          token = this.parseList.next();
+        while(token && parseList.position < (tok.emptyPosition || tok.endforPosition)) {
+          parseList.execToken(token);
+          token = parseList.next();
         }
       }
       
-      // move to after the endfor
-      if(forloop._length == 0) {
-        var token = this.parseList.next();
-        while(token && (token.type != 'tag' || token.name != 'endfor')) {
-          token = this.parseList.next();
+      // empty collection: move to empty block
+      if(forloop._length == 0 && tok.emptyPosition) {
+        parseList.forwardTo(tok.emptyPosition);
+        var token = parseList.next();
+        while(token && parseList.position < tok.endforPosition) {
+          parseList.execToken(token);
+          token = parseList.next();
         }
+      // non-empty collection: skip over the empty block
+      } else {
+        parseList.forwardTo(tok.endforPosition);
+      }
+    }
+  });
+  
+  
+  /**
+   * include
+   */
+  muttonchops.registerTag('include', {
+    preprocess: function(tok, parseList) {
+      if(tok.parts[0]) {
+        var m = tok.parts[0].match(/^[^'"](.*)$|^"(.*)"$|^'(.*)'$/);
+        tok.location = m[1] || m[2] || m[3];
+      }
+    },
+    execute: function(tok, parseList) {
+      if(tok.location) {
+        parseList.env.print('include: '+tok.location);
       }
     }
   });
