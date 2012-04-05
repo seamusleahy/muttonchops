@@ -171,9 +171,7 @@
      * @param templateString string - the template to processes
      */
     init: function(templateString, options, serializing) {
-      this.options = _.extend({}, {
-        templateLoader: root.muttonchops.defaultTemplateLoader
-      }, options || {});
+      this.options = _.extend({}, {/* default options */}, options || {});
       
       if(!serializing && !_.isArray(templateString)) {
         this.parseList = new ParseList();
@@ -196,9 +194,16 @@
      *
      * @return string - the rendered output
      */
-    execute: function(data) {
+    execute: function(data, envOptions) {
       var env = new Environment();
-      env.reset(data);
+      env.reset(data, envOptions);
+      this.parseList.reset();
+      this.parseList.run(env, this.options);
+      return env.output;
+    },
+    
+    executeWithInContext: function(env) {
+      this.parseList.reset();
       this.parseList.run(env, this.options);
       return env.output;
     }
@@ -219,6 +224,7 @@
     init: function() {
       this.data = {};
       this.output = '';
+      this.templateLoader = root.muttonchops.defaultTemplateLoader;
     },
     
     _unserializePreInit: function(refs) {
@@ -239,9 +245,11 @@
      *
      * @param data object - the data
      */
-    reset: function(data) {
+    reset: function(data, options) {
+      options = options || {};
       this.data = data || {};
       this.output = '';
+      this.templateLoader = options.templateLoader || root.muttonchops.defaultTemplateLoader;
     },
     
     /**
@@ -285,6 +293,7 @@
     init: function() {
       this.list = [];
       this.position = 0;
+      this.length = 0;
     },
     
     serialize: function(options) {
@@ -310,6 +319,7 @@
      */
     setList: function(list) {
       this.list = list;
+      this.length = this.list.length;
       this.position = 0;
     },
     
@@ -395,6 +405,14 @@
         this.execToken(t);
         t = this.next();
       }
+    },
+    
+    reset: function() {
+      this.position = 0;
+    },
+    
+    get: function(pos) {
+      return this.list[pos];
     },
     
     /**

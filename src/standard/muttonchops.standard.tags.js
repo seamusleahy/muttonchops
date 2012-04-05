@@ -245,15 +245,133 @@
   muttonchops.registerTag('include', {
     preprocess: function(tok, parseList) {
       if(tok.parts[0]) {
-        var m = tok.parts[0].match(/^[^'"](.*)$|^"(.*)"$|^'(.*)'$/);
-        tok.location = m[1] || m[2] || m[3];
+        var m = tok.parts[0].match(/^([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)$|^"(.*)"$|^'(.*)'$/);
+        
+        if(m) {
+          tok.location = m[1] || m[2] || m[3];
+          tok.isValue = !!(m[1]);
+        }
       }
     },
     execute: function(tok, parseList) {
       if(tok.location) {
-        parseList.env.print('include: '+tok.location);
+        
+        var loc = tok.location;
+        if(tok.isValue) {
+          loc = parseList.env.getValue(loc);
+        }
+        
+        var includedTemplate = parseList.env.templateLoader.fetch(loc);
+        if(includedTemplate) {
+          includedTemplate.template.executeWithInContext(parseList.env);
+        }
+      }
+    }
+  });
+  
+  
+  /**
+   * extend
+   */
+    muttonchops.registerTag('extends', {
+    preprocess: function(tok, parseList) {
+      // Ensure it is the first statement!
+      if(parseList.position == 0) {
+      
+        if(tok.parts[0]) {
+          // Get the lookup
+          // first set is a variable, second is double quoted string, and thrid is single quoted string
+          var m = tok.parts[0].match(/^([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)$|^"(.*)"$|^'(.*)'$/);
+          
+          if(!m) {
+            return;
+          }
+          tok.location = m[1] || m[3] || m[4];
+          tok.isValue = !!(m[1]);
+          
+          // Now find all the blocks
+          tok.blocks = {};
+          
+          var token = parseList.next();
+          while(token) {
+            if(token.type == 'tag' && token.name == 'block') {
+              parseList.preprocessToken(token);
+              if(token.blockName) {
+                tok.blocks[token.blockName] = parseList.position;
+              }
+            }
+            token = parseList.next();
+          }
+          // No point in rewinding because anything that could be touched already has  
+        }
+      }
+    },
+    execute: function(tok, parseList) {
+      if(tok.location) {
+        
+        var loc = tok.location;
+        if(tok.isValue) {
+          loc = parseList.env.getValue(loc);
+        }
+        
+        // Register this templates blocks
+        parseList.env.blocks = parseList.env.blocks || {};
+        _.each(tok.blocks, function(pos, name) {
+          if(!parseList.env.blocks[name]) {
+            parseList.env.blocks[name] = {parseList: parseList, position: pos};
+          }
+        });
+        
+        var includedTemplate = parseList.env.templateLoader.fetch(loc);
+        if(includedTemplate) {
+          includedTemplate.template.executeWithInContext(parseList.env);
+        }
+        
+        // skip to the end
+        parseList.forwardTo(parseList.length);
       }
     }
   });
 
+  
+  /**
+   * block
+   */
+  muttonchops.registerTag('block', {
+    preprocess: function(tok, parseList) {
+      if(tok.parts[0]) {
+        tok.blockName = tok.parts[0];
+        
+        var startPos = parseList.position;
+        
+        var token = parseList.next();
+        while(token && !(token.type == 'tag' && token.name == 'endblock' )) {
+          parseList.preprocessToken(token);
+          if(token.type == 'tag' && token.name == 'block') {
+            parseList.forwardTo(token.endBlockPosition);
+          }
+          token = parseList.next();
+        }
+        tok.endBlockPosition = parseList.position;
+        parseList.rewindTo(startPos);
+      }
+    },
+    execute: function(tok, parseList) {
+      // defer block to another template
+      if(parseList.env.blocks && parseList.env.blocks[tok.blockName] && parseList.env.blocks[tok.blockName].parseList != parseList) {
+        var bd = parseList.env.blocks[tok.blockName];
+        bd.parseList.rewindTo(bd.position);
+        bd.parseList.execToken(bd.parseList.get(bd.position));
+        parseList.forwardTo(tok.endBlockPosition);
+        
+      // run this block
+      } else {
+        var token = parseList.next();
+        while(token && parseList.position < tok.endBlockPosition) {
+          parseList.execToken(token);
+          token = parseList.next();
+        }
+      }
+    }
+  });
 })();
