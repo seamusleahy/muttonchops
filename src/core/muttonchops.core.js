@@ -422,24 +422,25 @@
      */
     parse: function(templateString) {
       var matches = templateString.match(/{{([^}]|}[^}])*}}|{%([^%]|%[^}])*%}|([^{]|{[^{%])+/g);
-      
-      var printRe = /^{{\s*(.*?)\s*}}$/;
-      var tagRe = /^{%\s*(.*?)\s*%}$/;
-      
       var tokens = [];
-      var m;
       
-      for(var i=0; i<matches.length; ++i) {
-        var tok = {};
-        if((m=matches[i].match(printRe))) {
-          tok.type = 'print';
-        } else if((m=matches[i].match(tagRe))) {
-          tok.type = 'tag';
-        } else {
-          tok.type = 'text';
+      if(matches) {
+        var printRe = /^{{\s*(.*?)\s*}}$/;
+        var tagRe = /^{%\s*(.*?)\s*%}$/;
+        var m;
+        
+        for(var i=0; i<matches.length; ++i) {
+          var tok = {};
+          if((m=matches[i].match(printRe))) {
+            tok.type = 'print';
+          } else if((m=matches[i].match(tagRe))) {
+            tok.type = 'tag';
+          } else {
+            tok.type = 'text';
+          }
+          TokenTypes[tok.type].init(tok, (m? m[1] : matches[i]));
+          tokens.push(tok);
         }
-        TokenTypes[tok.type].init(tok, (m? m[1] : matches[i]));
-        tokens.push(tok);
       }
       
       this.setList(tokens);
