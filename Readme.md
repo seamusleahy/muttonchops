@@ -13,7 +13,8 @@ Pass the template as a string into the Muttonchops make function to parse the st
 ```javascript
 var template = muttonchops.make('Hello, my name is {{name}}. {% if location %}I live in {{location}}{% endif %}');
 var output = template( {name: 'James'} );
-$('#output').html( output );```
+$('#output').html( output );
+```
 
 ## Print values ##
 
@@ -33,7 +34,8 @@ Tags are the part that do pretty much everything else. They can be used to do co
   We got a location.
 {% else %}
   We don't have a location.
-{% endif %}```
+{% endif %}
+```
 
 ## Register custom filters and tags ##
 
@@ -47,7 +49,8 @@ Registering a filter just requires a filter name and a callback function.
 muttonchops.registerFilter('filterName', function(value[, extraParam]*) {
   // do your filter action to value
   return <a value>;
-});```
+});
+```
 
 ### muttonchops.registerTag ###
 
@@ -59,7 +62,8 @@ The simplest is providing a tag name and function to run at execution.
 muttonchops.registerTag('tagName', function(thisToken, parseList) {
   // print out the tag as it would appear in the source
   parseList.env.print('{% '+thisToken.value+' %}');
-});```
+});
+```
 
 Now maybe you want to get more advance and take advantage of preprocessing which is useful to cache information. The preprocessing will also run before serializing a template.
 
@@ -72,7 +76,8 @@ muttonchops.registerTag('tagName', {
   execute: function(thisToken, parseList) {
   // print out the tag as it would appear in the source
   parseList.env.print(thisToken.output);
-});```
+});
+```
 
 The `thisToken` parament is a simple object that contains the information for the tag. You can add date to it as you like as long as it can be serialized to JSON. This means everything has to be either a number, string, boolean, null, array, or a simple object - no functions or advance objects.
 
