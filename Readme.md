@@ -10,7 +10,8 @@ extendable.
 
 Pass the template as a string into the Muttonchops make function to parse the string into a template function.
 
-```var template = muttonchops.make('Hello, my name is {{name}}. {% if location %}I live in {{location}}{% endif %}');
+```javascript
+var template = muttonchops.make('Hello, my name is {{name}}. {% if location %}I live in {{location}}{% endif %}');
 var output = template( {name: 'James'} );
 $('#output').html( output );```
 
@@ -27,7 +28,8 @@ You can easily filter the values for output by using a filter. To use a filter, 
 
 Tags are the part that do pretty much everything else. They can be used to do conditional logic, looping, including sub-template, etc. Each tag starts with the tag name then is followed by whatever the format for the tag is.
 
-```{% if location %}
+```
+{% if location %}
   We got a location.
 {% else %}
   We don't have a location.
@@ -41,7 +43,8 @@ At its core, Muttonchops just parses the string into a template that can be exec
 
 Registering a filter just requires a filter name and a callback function.
 
-```muttonchops.registerFilter('filterName', function(value[, extraParam]*) {
+```javascript
+muttonchops.registerFilter('filterName', function(value[, extraParam]*) {
   // do your filter action to value
   return <a value>;
 });```
@@ -52,14 +55,16 @@ Registering a tag has more options than a filter.
 
 The simplest is providing a tag name and function to run at execution.
 
-```muttonchops.registerTag('tagName', function(thisToken, parseList) {
+```javascript
+muttonchops.registerTag('tagName', function(thisToken, parseList) {
   // print out the tag as it would appear in the source
   parseList.env.print('{% '+thisToken.value+' %}');
 });```
 
 Now maybe you want to get more advance and take advantage of preprocessing which is useful to cache information. The preprocessing will also run before serializing a template.
 
-```muttonchops.registerTag('tagName', {
+```javascript
+muttonchops.registerTag('tagName', {
   preproces: function(thisToken, parseList) {
     thisToken.output = '{% '+thisToken.value+' %}';
   },
