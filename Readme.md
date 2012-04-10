@@ -44,7 +44,7 @@ Registering a filter just requires a filter name and a callback function.
 ```muttonchops.registerFilter('filterName', function(value[, extraParam]*) {
   // do your filter action to value
   return <a value>;
-});
+});```
 
 ### muttonchops.registerTag ###
 
