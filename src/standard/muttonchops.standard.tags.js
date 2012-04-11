@@ -21,7 +21,7 @@
         if(!token.statementTest) {
           token.statementTest = booleanStatementParser(token.parts[0]);
         }
-        if(statementTest(parseList.env)) {
+        if(token.statementTest(parseList.env)) {
           executed = true;
           doIt = true;
         } else {
