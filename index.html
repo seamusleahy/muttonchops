@@ -4,17 +4,19 @@
   <title>Muttonchops</title>
   
   <link rel="stylesheet" href="stylesheets/screen.css" type="text/css">
-  <script src="javascripts/modernizer.js"></script>
+  <script src="javascripts/modernizr.js"></script>
 </head>
 <body>
   <nav class="nav">
-    <a class="toggle-button"><i></i></a>
+    
     <ul>
       <li><a href="#about"><i class="icon-info-sign"></i><span class="label">About</span></a></li>
-      <li><a href="#download"><i></i><span class="label">Download</span></a></li>
-      <li><a href="#demo"><i></i><span class="label">Demo</span></a></li>
-      <li><a href="#documentation"><i></i><span class="label">Documentation</span></a></li>
+      <li><a href="#download"><i class="icon-download-alt"></i><span class="label">Download</span></a></li>
+      <li><a href="#demo"><i class="icon-eye-open"></i><span class="label">Demo</span></a></li>
+      <li><a href="#documentation"><i class="icon-book"></i><span class="label">Documentation</span></a></li>
     </ul>
+    
+    <a class="toggle-button"><i class="icon-reorder"></i></a>
   </nav>
   
   <header id="about" class="header">
@@ -45,6 +47,12 @@
     <p>Coming soon</p>
   </article>
   
-  <script src="/assets/app.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+  <script>
+    if (!this.jQuery) {
+      document.write(unescape("%3Cscript src='javascripts/jquery.js' %3E%3C/script%3E"));
+    }
+  </script>
+  <script src="javascripts/nav.js"></script>
 </body>
 </html>

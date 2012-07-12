@@ -1,22 +1,69 @@
-/* Smartphones (portrait and landscape) ----------- */
+@import "compass/css3";
+
 .nav {
   position: fixed;
   content: $mq-tablet-and-screen;
+  padding: 5px;
+
+  background-color: $color-magenta;
+  @include box-shadow(0 0 5px rgba(black, 0.75));
+
+  .rgba & {
+    background-color: rgba($color-magenta, 0.95);
+  }
   
-  @media only screen and (max-device-width: 480px) {
+  i {
+    font-size: 25px;
+    vertical-align: middle;
+  }
+
+  .label {
+    font-size: 18px;
+    padding-left: 5px;
+  }
+
+  a {
+    display: block;
+    padding: 5px;
+  }
+
+  ul {
+    overflow: hidden;
+  }
+
+  &, a {
+    color: $color-almost-white;
+  }
+
+  @media only screen and (max-width: 480px) {
     top: 0;
     left: 0;
     right: 0;
     
-    background: {
-      color: $color-dark-blue;
+    .collapsed {
+      height: 0;
     }
+    
+    
+    .toggle-button {
+      float: right;
+      clear: both;
+      cursor: pointer;
+    }
+    
+    ul {
+    }
+
   }
   
-  @media only screen and (min-device-width: 768px) {
+  @media only screen and (min-width: 481px) {
     left: 0;
     top: 0;
     bottom: 0;
     z-index: 0;
+    
+    .toggle-button {
+      display: none;
+    }
   }
 }
