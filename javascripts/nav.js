@@ -9,34 +9,18 @@
   $window = $(window);
 
   navEl = $('.nav').each(function() {
-    var anchors, currentEl, el, update;
+    var anchors, calculate, currentEl, el, update;
     el = $(this);
     anchors = [];
     currentEl = null;
-    el.find('a').each(function() {
-      var anchor, link, top;
-      link = $(this);
-      anchor = link.attr('href');
-      top = $(anchor).offset().top;
-      return anchors.push({
-        top: top,
-        anchor: anchor,
-        el: link
-      });
-    });
-    anchors.sort(function(a, b) {
-      return a.top - b.top;
-    });
     update = function(event) {
       var height, i, top;
       top = $window.scrollTop();
       height = $window.height();
       i = 0;
-      while (i < anchors.length && anchors[i].top < (top - height / 3) && anchors[i].top + anchors[i].el.outerHeight() < top) {
-        console.log(i, anchors[i].top, anchors[i].top + anchors[i].el.outerHeight(), top);
+      while (i < anchors.length && anchors[i].top < top) {
         ++i;
       }
-      console.log(i, anchors[i].top, anchors[i].top + anchors[i].el.outerHeight(), top);
       i = Math.min(anchors.length - 1, i);
       if (currentEl !== anchors[i].el) {
         if (currentEl) {
@@ -45,8 +29,48 @@
         return currentEl = anchors[i].el.addClass('highlight');
       }
     };
-    $window.on('resize scroll', update);
-    return update();
+    calculate = function() {
+      var topOff;
+      topOff = el.css('bottom') === 'auto' ? el.height() : 0;
+      anchors = [];
+      el.find('a').each(function() {
+        var anchor, anchorEl, link, top;
+        link = $(this);
+        anchor = link.attr('href');
+        anchorEl = $(anchor);
+        top = anchorEl.offset().top + topOff;
+        anchors.push({
+          top: top,
+          anchor: anchor,
+          el: link,
+          anchorEl: anchorEl
+        });
+        return link.data('anchorEl', anchorEl);
+      }).off('click').on('click', function(event) {
+        var dummy;
+        $('body').animate({
+          scrollTop: $(this).data('anchorEl').offset().top - topOff
+        }, 200);
+        dummy = $('<div></div>', {
+          id: $(this).attr('href').replace(/^#/, ''),
+          css: {
+            position: 'absolute',
+            visibility: 'hidden',
+            top: $window.scrollTop() + 'px'
+          }
+        }).prependTo('body');
+        return setTimeout(function() {
+          return dummy.remove();
+        }, 20);
+      });
+      anchors.sort(function(a, b) {
+        return a.top - b.top;
+      });
+      return update();
+    };
+    calculate();
+    $window.on('scroll', update);
+    return $window.on('resize', calculate);
   });
 
 }).call(this);

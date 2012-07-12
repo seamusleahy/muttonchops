@@ -214,8 +214,9 @@ a {
   /* line 75, ../sass/objects/_nav.scss */
   .nav li {
     white-space: nowrap;
+    padding-bottom: 2px;
   }
-  /* line 79, ../sass/objects/_nav.scss */
+  /* line 80, ../sass/objects/_nav.scss */
   .nav .label {
     opacity: 0;
     -webkit-transition-property: opacity;
@@ -227,15 +228,15 @@ a {
     -o-transition-duration: 0.3s;
     transition-duration: 0.3s;
   }
-  /* line 85, ../sass/objects/_nav.scss */
+  /* line 86, ../sass/objects/_nav.scss */
   .nav a:hover {
     background-color: #13094f;
   }
-  /* line 90, ../sass/objects/_nav.scss */
+  /* line 91, ../sass/objects/_nav.scss */
   .nav:hover ul {
     width: 180px;
   }
-  /* line 94, ../sass/objects/_nav.scss */
+  /* line 95, ../sass/objects/_nav.scss */
   .nav:hover .label {
     opacity: 1;
   }
