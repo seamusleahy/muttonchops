@@ -1,0 +1,116 @@
+.prose {
+  line-height: 1.3;
+  font-size: $base-font-size;
+  
+  h1 {
+    font-size: $base-font-size * 2;
+    font-weight: bold;
+    margin: 0.5;
+  }
+  
+  h2 {
+    font-size: $base-font-size * 1.5;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    margin-top: 0;
+  }
+  
+  * + h2 {
+    margin-top: 1em;
+  }
+  
+  h3 {
+    font-weight: bold;
+    margin-top: 1.5em;
+    margin-bottom: 1em;
+  }
+  
+  h4 {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  
+  h5 {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  
+  h6 {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+   
+  
+  p, blockquote, ul, ol, pre {
+    
+    & + p,
+    & + blockquote,
+    & + ul,
+    & + ol {
+      margin-top: 1em;
+    }
+  }
+  
+  ul, ol {
+    margin-left: $list-left-margin;
+    
+    li {
+      display: list-item;
+      margin-top: 0.5em;
+    }
+  }
+  
+  ul li {
+    list-style-type: disc;
+  }
+  
+  ol li {
+    list-style-type: decimal;
+  }
+  
+  blockquote {
+    margin-left: 1em;
+  }
+  
+  strong {
+    font-weight: bold;
+  }
+  
+  em {
+    font-style: italic;
+  }
+  
+  cite {
+    font-style: italic;
+  }
+  
+  img {
+    margin: 10px;
+  }
+  
+  code, tt {
+    font-family: $font-code;
+    font-size: $base-font-size*0.8;
+    margin: 0 2px;
+    padding: 1px 5px;
+    white-space: nowrap;
+    border: 1px solid adjust-lightness($color-muted-purple, -7%);
+    background-color: adjust-lightness($color-muted-purple, -4%);
+    border-radius: 3px;
+  }
+  
+  pre > code {
+    white-space: pre-wrap;
+    display: block;
+    margin: 1em 0;
+    padding: 10px;
+  }
+  
+  section {
+    padding-top: 2em;
+    padding-bottom: 2em;
+  }
+}

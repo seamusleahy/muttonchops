@@ -1,0 +1,18 @@
+$fontAwesomePath: "fonts/fontawesome-webfont" !default;
+
+
+i {
+  display: block;
+  width: 200px;
+  height: 200px;
+  background-color: red;
+  
+}
+
+body {
+  background-image: font-url("bg.png");
+}
+
+
+@import "font-awesome";
+

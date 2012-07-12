@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en-us"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en-us"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en-us"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en-us"> <!--<![endif]-->
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  
   <title>Muttonchops</title>
+  
+  <meta name="viewport" content="width=device-width">
+  
   
   <link rel="stylesheet" href="stylesheets/screen.css" type="text/css">
   <script src="javascripts/modernizr.js"></script>
 </head>
 <body>
+  <aside class="beta-banner"><div>Beta</div></aside>
   <nav class="nav">
     
     <ul>
@@ -15,37 +25,166 @@
       <li><a href="#demo"><i class="icon-eye-open"></i><span class="label">Demo</span></a></li>
       <li><a href="#documentation"><i class="icon-book"></i><span class="label">Documentation</span></a></li>
     </ul>
-    
-    <a class="toggle-button"><i class="icon-reorder"></i></a>
   </nav>
   
-  <header id="about" class="header">
+  <header id="about" class="header"><div class="container">
     <h1>Muttonchops</h1>
     <h2>A fancy Javascript template language</h2>
     
     <p>Muttonchops is inspired by the Django Template language. It is pure Javascript based with the goal of bring the awesomeness of the Django Template language to Javascript and to be flexibly and extendable.</p>
     
     <div id="download" class="download">
-      <a href="#" class="download">Download</a>
-      <a href="#" class="github">Github</a>
+      <a href="https://github.com/seamusleahy/muttonchops/zipball/master" class="button-download button button-big"><i class="icon-download-alt"></i> Download</a>
+      <a href="https://github.com/seamusleahy/muttonchops" class="button-github button button-big"><i class="icon-github"></i> Github</a>
     </div>
-  </header>
+  </div></header>
   
-  <article id="demo" class="section">
+  <article id="demo" class="section"><div class="container">
     <header>
       <h1>Demo</h1>
     </header>
     
     <p>Coming soon</p>
-  </article>
+  </div></article>
   
-  <article id="documentation" class="section">
+  <article id="documentation" class="section"><div class="container">
     <header>
       <h1>Documentation</h1>
-    </header>
-    
-    <p>Coming soon</p>
-  </article>
+     </header>
+      
+     <div class="prose">
+      <section>
+        <p>This is currently a work in processes.</p>
+        
+        <p>Muttonchops is inspired by the Django Template language. It is pure Javascript based with the goal
+        of bring the awesomeness of the Django Template language to Javascript and to be flexibly and 
+        extendable.</p>
+      </section>
+      
+      <section>
+        <h2>Basic usage</h2>
+        
+        <p>Pass the template as a string into the Muttonchops make function to parse the string into a template function.</p>
+        
+        <pre><code>var template = muttonchops.make('Hello, my name is {{name}}. {% if location %}I live in {{location}}{% endif %}');
+var output = template( {name: 'James'} );
+$('#output').html( output );</code></pre>
+      </section>
+      
+      <section>
+        <h2>Print values</h2>
+        
+        <p>You can print values you pass in by placing the variable name between: <code>{{ varname }}</code>. You can access object attributes too using the dot notation: <code>{{ varname.sub }}</code>. If the attribute is a function, it
+        will be called and the return value is used: <code>{{ varname.subfn }}</code>.</p>
+        
+        <h3>Filters</h3>
+        
+        <p>You can easily filter the values for output by using a filter. To use a filter, place a pipe <code>|</code> after the variable followed by the filter name: <code>{{ varname|reverse }}</code>. For some filters, you can pass in arguments: <code>{{ varname|repeat:3 }}</code>. And when one filter is not enough, you can chain multiple filters together: <code>{{ varname|reverse|repeat:3 }}</code>.</p>
+      </section>
+      
+      <section>
+        <h2>Tags</h2>
+        
+        <p>Tags are the part that do pretty much everything else. They can be used to do conditional logic, looping, including sub-template, etc. Each tag starts with the tag name then is followed by whatever the format for the tag is.</p>
+        
+        <pre><code>{% if location %}
+  We got a location.
+{% else %}
+  We don't have a location.
+{% endif %}</code></pre>
+      </section>
+      
+      <section>
+        <h2>Register custom filters and tags</h2>
+        
+        <p>At its core, Muttonchops just parses the string into a template that can be executed. But none of the filters or tags are hooked up to anything. Usually you would include the standard Muttonchop set of filters and tags; but you could create your whole own set or just add your own along side the standard set.</p>
+        
+        <h3>muttonchops.registerFilter</h3>
+        
+        <p>Registering a filter just requires a filter name and a callback function.</p>
+        
+        <pre><code>muttonchops.registerFilter('filterName', function(value[, extraParam]*) {
+  // do your filter action to value
+  return <a value>;
+});</code></pre>
+        
+        
+        <h3>muttonchops.registerTag</h3>
+        
+        <p>Registering a tag has more options than a filter.</p>
+        
+        <p>The simplest is providing a tag name and function to run at execution.</p>
+        
+        <pre><code>muttonchops.registerTag('tagName', function(thisToken, parseList) {
+  // print out the tag as it would appear in the source
+  parseList.env.print('{% '+thisToken.value+' %}');
+});</code></pre>
+      
+        <p>Now maybe you want to get more advance and take advantage of preprocessing which is useful to cache information. The preprocessing will also run before serializing a template.</p>
+      
+        <pre><code>muttonchops.registerTag('tagName', {
+  preproces: function(thisToken, parseList) {
+    thisToken.output = '{% '+thisToken.value+' %}';
+  },
+
+  execute: function(thisToken, parseList) {
+  // print out the tag as it would appear in the source
+  parseList.env.print(thisToken.output);
+});</code></pre>
+
+        <p>The <code>thisToken</code> parament is a simple object that contains the information for the tag. You can add date to it as you like as long as it can be serialized to JSON. This means everything has to be either a number, string, boolean, null, array, or a simple object - no functions or advance objects.</p>
+      
+        <p>Muttonchops by default adds three values to <code>thisToken</code>:</p>
+      
+        <ol>
+          <li><code>value</code>: the raw value of the tag</li>
+          <li><code>name</code>: the tag name</li>
+          <li><code>parts</code>: an array of values split by whitespace after the tag name (quoted strings are not broken in the middle of)</li>
+        </ol>
+        
+        <p>The <code>parseList</code> is the object that contains the parsed template and contains the rest of the functionality.</p>
+      
+        <ol>
+          <li><code>parseList.end()</code>: return true if at the end, otherwise, false</li>
+          <li><code>parseList.next()</code>: advances to the next token in the parse list and returns it</li>
+          <li><code>parseList.peek()</code>: returns the next token without advancing the position</li>
+          <li><code>parseList.rewindTo(position or token)</code>: rewinds the current position to a position or to a token</li>
+          <li><code>parseList.forwardTo(position or toke)</code>: moves the current position forward to a position or to a token</li>
+          <li><code>parseList.get(position)</code>: get the token at a position</li>
+          <li><code>parseList.execToken(token)</code>: execute a token</li>
+          <li><code>parseList.position</code>: the current position</li>
+          <li><code>parseList.length</code>: the number of tokens</li>
+          <li><code>parseList.env</code>: the Environment object for when the template is being executed</li>
+        </ol>
+        
+        <p>The Environment objects contains the data regarding the current execution such as the output and input data.</p>
+      
+        <ol>
+          <li><code>parseList.env.print( output )</code>: appends the <code>output</code> to the resulting output</li>
+          <li><code>parseList.env.getValue( variable )</code>: get the value of a variable from the data passed in</li>
+          <li><code>parseList.env.templateLoader</code>: the template loader object to use</li>
+        </ol>
+      </section>
+      
+      <section>
+        <h2>Standard Filters</h2>
+        
+        <p>Currently the set of standard filters is a selection of Javascript string methods and a binding of the Underscore String library.</p>
+      </section>
+      
+      <section>
+        <h2>Standard Tags</h2>
+        
+        <h3>Branching: if, unless, elseif, else, endif</h3>
+        
+        <h3>Looping: for, empty, endfor</h3>
+        
+        <h3>Sub-templates: include</h3>
+        
+        <h3>Template extension: extends, block, endblock</h3>
+      </section>
+    </div>
+  </div></article>
   
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
   <script>
@@ -53,6 +192,8 @@
       document.write(unescape("%3Cscript src='javascripts/jquery.js' %3E%3C/script%3E"));
     }
   </script>
+  <script src="javascripts/jquery.lettering.js"></script>
+  <script src="javascripts/text.js"></script>
   <script src="javascripts/nav.js"></script>
 </body>
 </html>

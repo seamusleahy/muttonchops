@@ -1,0 +1,8 @@
+source 'http://rubygems.org'
+
+gem "catapult"
+
+gem "sprockets-sass"
+gem "sprockets-helpers"
+gem "sass"
+gem "compass"

@@ -1,0 +1,44 @@
+.beta-banner {
+  
+  font: {
+    size: 35px;
+    weight: bold;
+  }
+  
+  text-shadow: 0 -2px 1px rgba(white, 0.5);
+  text-transform: uppercase;
+  
+  div {
+    @include background-image(linear-gradient(adjust-lightness($color-yellow, -10%), $color-yellow));
+    background-color: $color-yellow;
+    color: $color-black;
+    @include box-shadow(0 0 15px rgba(black, 0.5));
+    
+  }
+  
+  
+  @media only screen and (max-width: 480px) {
+    div {
+      text-align: center;
+      padding: 8px;
+    }
+  }
+  
+  @media only screen and (min-width: 481px) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 200px;
+    z-index: 20;
+    
+    overflow: hidden;
+    
+    
+    div {
+      padding: 40px 0 10px 170px;
+      @include transform(rotate(17deg));
+      @include transform-origin(100%, 100%);
+    }
+  }
+}

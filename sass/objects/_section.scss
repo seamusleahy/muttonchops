@@ -1,0 +1,51 @@
+.section {
+  padding: 20px 0;
+  
+  .section + & {
+    border-top: solid 1px adjust-lightness($color-muted-purple, -5%);
+  }
+  
+  section + section {
+    border-top: solid 1px adjust-lightness($color-muted-purple, -2%);
+  }
+  
+  
+  @media only screen and (max-width: 480px) {
+    padding-left: 5px;
+    padding-right: 5px;
+    
+    header {
+      h1 {
+        font-size: 25px;
+        margin-bottom: 10px;
+      }
+    }
+  }
+  
+  
+  @media only screen and (min-width: 481px) {
+    padding: 30px 0;
+    
+    header {
+      h1 {
+        font-size: 30px;
+        color: mix($color-muted-purple, $color-almost-white, 35%);
+        text-shadow: 0 -1px 0 rgba(black, 0.5);
+        margin-bottom: 20px;
+      }
+    }
+    
+    h2, h3, h4 {
+      color: mix($color-muted-purple, $color-almost-white, 20%);
+      text-shadow: 0 -1px 0 rgba(black, 0.5);
+    }
+  }
+  
+  @media only screen and (min-width: 769px) {
+    header {
+      h1 {
+        font-size: 50px;
+      }
+    }
+  }
+}

@@ -2,8 +2,9 @@
 
 .nav {
   position: fixed;
-  content: $mq-tablet-and-screen;
   padding: 5px;
+  z-index: 100;
+  
 
   background-color: $color-magenta;
   @include box-shadow(0 0 5px rgba(black, 0.75));
@@ -25,10 +26,13 @@
   a {
     display: block;
     padding: 5px;
-  }
-
-  ul {
-    overflow: hidden;
+    @include border-radius(5px);
+    @include transition-property(background-color);
+    @include transition-duration(0.3s);
+    
+    &.highlight {
+      background-color: mix($color-magenta, $color-dark-blue);
+    }
   }
 
   &, a {
@@ -39,31 +43,57 @@
     top: 0;
     left: 0;
     right: 0;
+    text-align: center;
     
-    .collapsed {
-      height: 0;
+    .label {
+      display: none;
     }
     
-    
-    .toggle-button {
-      float: right;
-      clear: both;
-      cursor: pointer;
+    li {
+      @include inline-block;
+      position: relative;
     }
-    
-    ul {
-    }
-
   }
   
-  @media only screen and (min-width: 481px) {
+  @media only screen and (min-width: 480px) {
     left: 0;
     top: 0;
     bottom: 0;
-    z-index: 0;
     
-    .toggle-button {
-      display: none;
+    i {
+      width: 35px;
+    }
+    ul {
+      position: relative;
+      margin-top: 20px;
+      overflow: hidden;
+      width: 40px;
+      @include transition-property(width);
+      @include transition-duration(0.3s);
+    }
+    
+    li {
+      white-space: nowrap;
+    }
+    
+    .label {
+      opacity: 0;
+      @include transition-property(opacity);
+      @include transition-duration(0.3s);
+    }
+    
+    a:hover {
+      background-color: $color-dark-blue;
+    }
+    
+    &:hover {
+      ul {
+        width: 180px;
+      }
+      
+      .label {
+        opacity: 1;
+      }
     }
   }
 }

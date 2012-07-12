@@ -1,6 +1,14 @@
+@import url(http://fonts.googleapis.com/css?family=Maiden+Orange);
+
+$font-heading: "Maiden Orange";
+$font-code: Consolas,Menlo,"Liberation Mono",Courier,monospace;
+$base-font-size: 16px;
+$list-left-margin: 2em;
+
 body {
   font: {
     family: proxima-nova, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    size: $base-font-size;
   }
 }
 

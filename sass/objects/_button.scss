@@ -1,0 +1,34 @@
+.button {
+  @include inline-block;
+  padding: 5px 8px;
+  background-color: $color-dark-blue;
+  @include background-image(linear-gradient(
+    rgba($color-dark-blue, 0), 
+    rgba(adjust-lightness($color-dark-blue, -8%), 0.5)
+  ));
+  color: $color-almost-white;
+  font-size: 15px;
+  text-shadow: 2px 2px 1px rgba(white, 0.2);
+  
+  @include border-radius(3px);
+  @include transition-property(background-color);
+  @include transition-duration(0.3s);
+  
+  &:hover {
+    background-color: $color-magenta;
+  }
+}
+
+.button-big {
+  @include border-radius(5px);
+  
+  @media only screen and (max-width: 480px) {
+    font-size: 20px;
+    padding: 6px 10px;
+  }
+  
+  @media only screen and (min-width: 481px) {
+    font-size: 25px;
+    padding: 8px 15px;
+  }
+}

@@ -1,0 +1,22 @@
+/* Smartphones (portrait and landscape) ----------- */
+.nav {
+  position: fixed;
+  content: $mq-tablet-and-screen;
+  
+  @media only screen and (max-device-width: 480px) {
+    top: 0;
+    left: 0;
+    right: 0;
+    
+    background: {
+      color: $color-dark-blue;
+    }
+  }
+  
+  @media only screen and (min-device-width: 768px) {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+}

@@ -2,11 +2,12 @@ $color-almost-white: #F1FAF5;
 $color-dark-blue: #13094F;
 $color-teal: #15A8B0;
 $color-magenta: #D21F56;
-$color-muted-purple: #897578;
+$color-muted-purple: #524648; /* #897578; */
 $color-black: #222;
+$color-yellow: #F9C118;
 
 
 body {
-  background-color: $color-almost-white;
-  color: $color-black;
+  background-color: $color-muted-purple;
+  color: $color-almost-white;
 }
