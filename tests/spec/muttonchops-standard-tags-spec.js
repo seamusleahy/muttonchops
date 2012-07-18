@@ -70,9 +70,14 @@ describe('branching tags', function() {
     expect(template({v: true, w: true})).toBe(' elseif-block ');
   });
   
-    it('should print nothing when `unless` evaluates to true and `elseif` evaluates to false', function() {
+  it('should print nothing when `unless` evaluates to true and `elseif` evaluates to false', function() {
     var template = muttonchops.make('{% unless v %} unless-block {% elseif w %} elseif-block {% endif %}');
     expect(template({v: true, w: false})).toBe('');
+  });
+  
+  it('should print the print the outer if and the nested else block', function() {
+    var template = muttonchops.make('{% if v %}a{% if w %}b{% else %}c{% endif %}d{% else %}e{% endif %}');
+    expect(template({v: true, w: false})).toBe('acd');
   });
 });
 
